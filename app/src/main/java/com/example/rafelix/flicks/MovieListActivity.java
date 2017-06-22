@@ -66,10 +66,19 @@ public class MovieListActivity extends AppCompatActivity {
                         adapter.notifyItemInserted(movies.size() - 1);
                     }
                     Log.i(TAG, String.format("Loaded %s movies", results.length()));
-                    getNowPlaying();
                 } catch (JSONException e) {
                     logError("Failed to parse now playing movies", e, true);
                 }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
             }
 
             @Override
@@ -95,6 +104,16 @@ public class MovieListActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     logError("Failed parsing configuration", e, true);
                 }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
             }
 
             @Override
