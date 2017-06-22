@@ -2,9 +2,12 @@ package com.example.rafelix.flicks;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.rafelix.flicks.models.Config;
 import com.example.rafelix.flicks.models.Movie;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -26,10 +29,14 @@ public class MovieListActivity extends AppCompatActivity {
 
     AsyncHttpClient client;
 
-    String imageBaseUrl;
-    String posterSize;
 
     ArrayList<Movie> movies;
+
+    RecyclerView rvMovies;
+
+    MovieAdapter adapter;
+
+    Config config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +44,10 @@ public class MovieListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_list);
         client = new AsyncHttpClient();
         movies = new ArrayList<>();
+        adapter = new MovieAdapter(movies);
+        rvMovies = (RecyclerView) findViewById(R.id.rvMovies);
+        rvMovies.setLayoutManager(new LinearLayoutManager(this));
+        rvMovies.setAdapter(adapter);
         getConfiguration();
     }
 
@@ -52,6 +63,7 @@ public class MovieListActivity extends AppCompatActivity {
                     for (int i = 0; i < results.length(); i++) {
                         Movie movie = new Movie(results.getJSONObject(i));
                         movies.add(movie);
+                        adapter.notifyItemInserted(movies.size() - 1);
                     }
                     Log.i(TAG, String.format("Loaded %s movies", results.length()));
                     getNowPlaying();
@@ -75,11 +87,11 @@ public class MovieListActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    JSONObject images = response.getJSONObject("images");
-                    imageBaseUrl = images.getString("secure_base_url");
-                    JSONArray posterSizeOptions = images.getJSONArray("poster_sizes");
-                    posterSize = posterSizeOptions.optString(3, "w342");
-                    Log.i(TAG, String.format("Loaded configuration with imageBaseUrl %s and posterSize %s", imageBaseUrl, posterSize))
+                    config = new Config(response);
+                    Log.i(TAG, String.format("Loaded configuration with imageBaseUrl %s and posterSize %s",
+                            config.getImageBaseUrl(), config.getPosterSize()));
+                    adapter.setConfig(config);
+                    getNowPlaying();
                 } catch (JSONException e) {
                     logError("Failed parsing configuration", e, true);
                 }
